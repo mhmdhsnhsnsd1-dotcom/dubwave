@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DubWave — دبلجة الفيديو بالذكاء الاصطناعي لكل لغات العالم</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;900&family=Cairo:wght@400;600;800&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#0c1118;
+    --ink-2:#121a26;
+    --panel:#161f2c;
+    --line:rgba(237,234,227,0.09);
+    --paper:#EDEAE3;
+    --paper-dim:#9aa3af;
+    --amber:#F2A93B;
+    --amber-dim:#8a611f;
+    --teal:#2BA793;
+    --teal-dim:#1c6157;
+    --danger:#e3654a;
+    --radius:14px;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;
+    background:var(--ink);
+    color:var(--paper);
+    font-family:'Tajawal',sans-serif;
+    line-height:1.65;
+    overflow-x:hidden;
+  }
+  h1,h2,h3,.display{font-family:'Cairo',sans-serif;}
+  .mono{font-family:'IBM Plex Mono',monospace;direction:ltr;display:inline-block;}
+  a{color:inherit;}
+  img,svg{display:block;}
+  ::selection{background:var(--amber);color:#141414;}
+
+  .wrap{max-width:1180px;margin:0 auto;padding:0 24px;}
+  @media(max-width:640px){.wrap{padding:0 18px;}}
+
+  /* NAV */
+  header{
+    position:sticky;top:0;z-index:50;
+    background:rgba(12,17,24,0.85);
+    backdrop-filter:blur(10px);
+    border-bottom:1px solid var(--line);
+  }
+  nav{display:flex;align-items:center;justify-content:space-between;padding:16px 0;}
+  .logo{display:flex;align-items:center;gap:10px;font-weight:800;font-size:20px;}
+  .logo .mark{
+    width:34px;height:34px;border-radius:9px;
+    background:linear-gradient(135deg,var(--amber),var(--teal));
+    display:flex;align-items:center;justify-content:center;
+    color:#0c1118;font-weight:900;font-family:'Cairo';font-size:16px;
+  }
+  .navlinks{display:flex;gap:28px;font-size:15px;color:var(--paper-dim);}
+  .navlinks a:hover{color:var(--paper);}
+  @media(max-width:800px){.navlinks{display:none;}}
+  .btn{
+    display:inline-flex;align-items:center;gap:8px;
+    padding:11px 22px;border-radius:999px;border:none;
+    font-family:'Tajawal';font-weight:700;font-size:15px;cursor:pointer;
+    transition:transform .15s ease, box-shadow .15s ease;
+  }
+  .btn-primary{background:var(--amber);color:#161005;}
+  .btn-primary:hover{transform:translateY(-2px);box-shadow:0 10px 24px -8px rgba(242,169,59,.55);}
+  .btn-ghost{background:transparent;color:var(--paper);border:1px solid var(--line);}
+  .btn-ghost:hover{border-color:var(--paper-dim);}
+  .btn:disabled{opacity:.45;cursor:not-allowed;transform:none;box-shadow:none;}
+
+  /* HERO */
+  .hero{padding:76px 0 40px;position:relative;}
+  .eyebrow{
+    color:var(--teal);font-family:'IBM Plex Mono';font-size:13px;letter-spacing:.06em;
+    display:flex;align-items:center;gap:10px;margin-bottom:18px;direction:rtl;
+  }
+  .eyebrow .dot{width:7px;height:7px;border-radius:50%;background:var(--teal);box-shadow:0 0 0 4px rgba(43,167,147,.18);}
+  .hero h1{font-size:clamp(34px,5.4vw,60px);font-weight:800;line-height:1.18;margin:0 0 22px;max-width:900px;}
+  .hero h1 span{color:var(--amber);}
+  .hero p.lead{font-size:18px;color:var(--paper-dim);max-width:640px;margin:0 0 34px;}
+  .hero-cta{display:flex;gap:14px;flex-wrap:wrap;margin-bottom:56px;}
+
+  /* signature: language ticker morphing waveform */
+  .signature{
+    border:1px solid var(--line);border-radius:20px;background:var(--panel);
+    padding:26px 26px 20px;overflow:hidden;position:relative;
+  }
+  .wave{
+    display:flex;align-items:flex-end;gap:3px;height:64px;margin-bottom:18px;
+  }
+  .wave span{
+    flex:1;background:linear-gradient(180deg,var(--amber),var(--teal));
+    border-radius:3px;animation:bar 1.4s ease-in-out infinite;
+  }
+  @keyframes bar{0%,100%{height:14%;}50%{height:100%;}}
+  .ticker-row{overflow:hidden;white-space:nowrap;border-top:1px solid var(--line);padding-top:16px;}
+  .ticker{display:inline-flex;gap:26px;animation:scroll 26s linear infinite;font-family:'IBM Plex Mono';font-size:14px;color:var(--paper-dim);}
+  .ticker b{color:var(--paper);font-weight:500;}
+  @keyframes scroll{from{transform:translateX(0);}to{transform:translateX(-50%);}}
+  @media (prefers-reduced-motion: reduce){
+    .wave span{animation:none;height:50%;}
+    .ticker{animation:none;}
+  }
+
+  section{padding:70px 0;}
+  .section-head{max-width:640px;margin-bottom:40px;}
+  .section-head .eyebrow{margin-bottom:12px;}
+  .section-head h2{font-size:clamp(26px,3.4vw,36px);margin:0 0 14px;font-weight:800;}
+  .section-head p{color:var(--paper-dim);font-size:16px;margin:0;}
+
+  /* TOOL */
+  .tool{
+    border:1px solid var(--line);border-radius:20px;background:var(--panel);padding:30px;
+  }
+  .tool-grid{display:grid;grid-template-columns:1.1fr .9fr;gap:34px;}
+  @media(max-width:880px){.tool-grid{grid-template-columns:1fr;}}
+
+  .drop{
+    border:1.5px dashed rgba(237,234,227,0.25);border-radius:16px;
+    padding:36px 20px;text-align:center;cursor:pointer;transition:.2s;
+    background:rgba(255,255,255,0.015);
+  }
+  .drop:hover{border-color:var(--amber);background:rgba(242,169,59,0.04);}
+  .drop .icon{font-size:30px;margin-bottom:10px;}
+  .drop .hint{color:var(--paper-dim);font-size:13px;margin-top:6px;}
+  #fileInput{display:none;}
+
+  .file-info{
+    display:flex;align-items:center;justify-content:space-between;
+    background:rgba(255,255,255,0.03);border:1px solid var(--line);
+    border-radius:12px;padding:14px 16px;margin-top:14px;font-size:14px;
+  }
+  .file-info .badge{
+    font-family:'IBM Plex Mono';font-size:12px;padding:4px 10px;border-radius:999px;
+    background:rgba(43,167,147,0.14);color:var(--teal);
+  }
+  .file-info .badge.long{background:rgba(242,169,59,0.16);color:var(--amber);}
+
+  label.field-label{display:block;font-size:13px;color:var(--paper-dim);margin:20px 0 8px;font-weight:500;}
+  .lang-search{position:relative;}
+  input[type=text], select{
+    width:100%;background:var(--ink-2);border:1px solid var(--line);color:var(--paper);
+    padding:12px 14px;border-radius:10px;font-family:'Tajawal';font-size:15px;outline:none;
+  }
+  input[type=text]:focus, select:focus{border-color:var(--teal);}
+  select{appearance:none;cursor:pointer;}
+  .voice-opts{display:flex;gap:10px;flex-wrap:wrap;margin-top:8px;}
+  .chip{
+    padding:8px 14px;border-radius:999px;border:1px solid var(--line);font-size:13px;
+    cursor:pointer;color:var(--paper-dim);transition:.15s;
+  }
+  .chip.active{background:var(--teal);border-color:var(--teal);color:#08201c;font-weight:700;}
+
+  .progress-wrap{margin-top:22px;display:none;}
+  .progress-wrap.show{display:block;}
+  .progress-bar{height:8px;border-radius:99px;background:var(--ink-2);overflow:hidden;}
+  .progress-fill{height:100%;width:0%;background:linear-gradient(90deg,var(--teal),var(--amber));transition:width .25s;}
+  .progress-label{font-size:13px;color:var(--paper-dim);margin-top:8px;font-family:'IBM Plex Mono';}
+
+  .result{
+    margin-top:20px;padding:16px;border-radius:12px;border:1px solid var(--teal-dim);
+    background:rgba(43,167,147,0.08);display:none;font-size:14px;
+  }
+  .result.show{display:block;}
+
+  /* right panel: ad-rule explainer */
+  .rule-card{background:var(--ink-2);border:1px solid var(--line);border-radius:16px;padding:22px;}
+  .rule-card h3{margin:0 0 6px;font-size:17px;}
+  .rule-card p.sub{color:var(--paper-dim);font-size:13px;margin:0 0 20px;}
+  .rule-row{display:flex;align-items:center;gap:14px;padding:14px 0;border-top:1px solid var(--line);}
+  .rule-row:first-of-type{border-top:none;}
+  .rule-row .num{
+    font-family:'IBM Plex Mono';font-size:20px;font-weight:600;color:var(--amber);
+    min-width:34px;text-align:center;
+  }
+  .rule-row .txt b{display:block;font-size:14px;margin-bottom:2px;}
+  .rule-row .txt span{font-size:13px;color:var(--paper-dim);}
+  .note{
+    margin-top:18px;padding:12px 14px;border-radius:10px;background:rgba(242,169,59,0.08);
+    border:1px solid rgba(242,169,59,0.25);font-size:12.5px;color:var(--paper-dim);
+  }
+
+  /* FEATURES */
+  .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;}
+  @media(max-width:880px){.grid3{grid-template-columns:repeat(2,1fr);}}
+  @media(max-width:600px){.grid3{grid-template-columns:1fr;}}
+  .feat{
+    border:1px solid var(--line);border-radius:16px;padding:22px;background:var(--panel);
+    transition:.2s;
+  }
+  .feat:hover{border-color:rgba(242,169,59,0.4);transform:translateY(-3px);}
+  .feat .fi{font-size:24px;margin-bottom:14px;}
+  .feat h3{font-size:16px;margin:0 0 8px;}
+  .feat p{font-size:13.5px;color:var(--paper-dim);margin:0;}
+
+  /* LANGUAGES */
+  .lang-cloud{display:flex;flex-wrap:wrap;gap:10px;}
+  .lang-pill{
+    padding:9px 16px;border-radius:999px;background:var(--ink-2);border:1px solid var(--line);
+    font-size:13.5px;color:var(--paper-dim);
+  }
+  .lang-pill b{color:var(--paper);font-weight:600;}
+  .more-pill{color:var(--teal);font-weight:700;}
+
+  /* MODEL */
+  .model{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;}
+  @media(max-width:880px){.model{grid-template-columns:repeat(2,1fr);}}
+  .model .stat{border:1px solid var(--line);border-radius:14px;padding:20px;background:var(--panel);}
+  .model .stat .n{font-family:'Cairo';font-weight:800;font-size:26px;color:var(--amber);}
+  .model .stat .l{font-size:13px;color:var(--paper-dim);margin-top:4px;}
+
+  footer{border-top:1px solid var(--line);padding:40px 0;color:var(--paper-dim);font-size:13.5px;}
+  footer .foot-row{display:flex;justify-content:space-between;flex-wrap:wrap;gap:16px;}
+
+  /* AD MODAL */
+  .overlay{
+    position:fixed;inset:0;background:rgba(6,8,12,0.86);backdrop-filter:blur(4px);
+    display:none;align-items:center;justify-content:center;z-index:100;padding:20px;
+  }
+  .overlay.show{display:flex;}
+  .ad-card{
+    width:100%;max-width:420px;background:var(--panel);border:1px solid var(--line);
+    border-radius:18px;padding:26px;text-align:center;
+  }
+  .ad-card .ad-tag{
+    display:inline-block;font-family:'IBM Plex Mono';font-size:11px;color:var(--ink);
+    background:var(--amber);padding:3px 10px;border-radius:6px;margin-bottom:16px;font-weight:600;
+  }
+  .ad-visual{
+    height:150px;border-radius:12px;margin-bottom:16px;
+    background:repeating-linear-gradient(135deg,var(--teal-dim),var(--teal-dim) 10px,var(--ink-2) 10px,var(--ink-2) 20px);
+    display:flex;align-items:center;justify-content:center;font-family:'Cairo';font-weight:800;font-size:15px;color:var(--paper);
+  }
+  .ad-card h4{margin:0 0 6px;font-size:15px;}
+  .ad-card p{font-size:12.5px;color:var(--paper-dim);margin:0 0 18px;}
+  .ad-count{font-family:'IBM Plex Mono';font-size:12px;color:var(--paper-dim);margin-bottom:14px;}
+  .ad-skip{
+    width:100%;padding:12px;border-radius:10px;border:none;background:var(--ink-2);color:var(--paper-dim);
+    font-family:'IBM Plex Mono';font-size:13px;cursor:not-allowed;
+  }
+  .ad-skip.ready{background:var(--amber);color:#181205;cursor:pointer;font-weight:700;}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <nav>
+      <div class="logo"><span class="mark">DW</span> DubWave</div>
+      <div class="navlinks">
+        <a href="#tool">أداة الدبلجة</a>
+        <a href="#features">المزايا</a>
+        <a href="#languages">اللغات</a>
+        <a href="#model">نموذج الإعلانات</a>
+      </div>
+      <button class="btn btn-primary" onclick="document.getElementById('tool').scrollIntoView({behavior:'smooth'})">جرّب الآن</button>
+    </nav>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="wrap">
+    <div class="eyebrow"><span class="dot"></span> منصة دبلجة فيديو بالذكاء الاصطناعي — مجانية ومموّلة بالإعلانات</div>
+    <h1>افتح فيديوك لأي لغة في العالم، <span>بصوتٍ يبدو طبيعيًا</span>، خلال دقائق.</h1>
+    <p class="lead">DubWave تحوّل أي فيديو إلى نسخة مدبلجة بأكثر من 100 لغة، مع ترجمة نصية تلقائية ومزامنة للصوت مع الحركة. الاستخدام مجاني بالكامل، ونموّل الخدمة بعرض إعلان واحد للفيديوهات القصيرة، وثلاثة إعلانات فقط للفيديوهات التي تتجاوز 50 دقيقة.</p>
+    <div class="hero-cta">
+      <button class="btn btn-primary" onclick="document.getElementById('tool').scrollIntoView({behavior:'smooth'})">ابدأ دبلجة فيديو</button>
+      <button class="btn btn-ghost" onclick="document.getElementById('model').scrollIntoView({behavior:'smooth'})">كيف نربح من الإعلانات؟</button>
+    </div>
+
+    <div class="signature">
+      <div class="wave" id="waveBars"></div>
+      <div class="ticker-row">
+        <div class="ticker" id="tickerTrack"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="tool">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="eyebrow"><span class="dot"></span> الأداة</div>
+      <h2>ارفع فيديوك، اختر اللغة، واحصل على نسخة مدبلجة</h2>
+      <p>هذا عرض تفاعلي حقيقي لتجربة الاستخدام: يقرأ المتصفح مدة الفيديو فعليًا من الملف الذي ترفعه، ويطبّق قاعدة الإعلانات تلقائيًا حسب المدة.</p>
+    </div>
+
+    <div class="tool">
+      <div class="tool-grid">
+        <div>
+          <div class="drop" id="dropZone" onclick="document.getElementById('fileInput').click()">
+            <div class="icon">🎬</div>
+            <div><b>اسحب الفيديو هنا أو اضغط للاختيار</b></div>
+            <div class="hint">MP4 · MOV · MKV — المعالجة تتم محليًا لقراءة المدة فقط</div>
+          </div>
+          <input type="file" id="fileInput" accept="video/*">
+          <div class="file-info" id="fileInfo" style="display:none;">
+            <span id="fileName">—</span>
+            <span class="badge" id="durationBadge">—</span>
+          </div>
+
+          <label class="field-label">لغة الدبلجة الهدف</label>
+          <div class="lang-search">
+            <select id="langSelect"></select>
+          </div>
+
+          <label class="field-label">نمط الصوت</label>
+          <div class="voice-opts">
+            <div class="chip active" data-voice="طبيعي">طبيعي</div>
+            <div class="chip" data-voice="إخباري">إخباري</div>
+            <div class="chip" data-voice="حيوي">حيوي وحماسي</div>
+            <div class="chip" data-voice="هادئ">هادئ</div>
+          </div>
+
+          <div class="progress-wrap" id="progressWrap">
+            <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+            <div class="progress-label" id="progressLabel">جاري التحليل الصوتي…</div>
+          </div>
+
+          <div class="result" id="resultBox"></div>
+
+          <div style="margin-top:22px;">
+            <button class="btn btn-primary" id="startBtn" disabled>ابدأ الدبلجة</button>
+          </div>
+        </div>
+
+        <div class="rule-card">
+          <h3>قاعدة الإعلانات</h3>
+          <p class="sub">شفافة وثابتة لكل مستخدمي المنصة حول العالم</p>
+          <div class="rule-row">
+            <div class="num">1</div>
+            <div class="txt"><b>أقل من 50 دقيقة</b><span>إعلان واحد قصير قبل بدء المعالجة، ثم تحميل مباشر للنسخة المدبلجة.</span></div>
+          </div>
+          <div class="rule-row">
+            <div class="num">3</div>
+            <div class="txt"><b>50 دقيقة فأكثر</b><span>ثلاثة إعلانات موزّعة على مراحل المعالجة (تحليل، ترجمة، توليد الصوت) لتغطية تكلفة المعالجة الأطول.</span></div>
+          </div>
+          <div class="note">في هذا العرض التوضيحي، الإعلانات محاكاة بصريًا فقط. في نسخة الإنتاج تُستبدل بمساحات إعلانية حقيقية (مثل Google AdSense أو شبكة فيديو إعلانية) وتُحمَّل عبر الخادم.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="features">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="eyebrow"><span class="dot"></span> ما يميّز DubWave</div>
+      <h2>ليست دبلجة فقط — بل منظومة كاملة لصنّاع المحتوى العالميين</h2>
+      <p>مزايا مضافة تجعل الموقع مفيدًا لصانعي المحتوى والمشاهدين معًا، وتُبقي المستخدم داخل المنصة لمدة أطول.</p>
+    </div>
+    <div class="grid3">
+      <div class="feat"><div class="fi">🫦</div><h3>مزامنة حركة الشفاه</h3><p>تعديل اختياري لحركة الفم في الفيديو لتقارب الصوت المدبلج، لا مجرد استبدال الصوت.</p></div>
+      <div class="feat"><div class="fi">🗣️</div><h3>استنساخ الصوت الأصلي</h3><p>الحفاظ على نبرة وشخصية صوت المتحدث الأصلي عند الدبلجة، بموافقة صريحة من صاحب الفيديو.</p></div>
+      <div class="feat"><div class="fi">📝</div><h3>ترجمة نصية تلقائية</h3><p>ملفات SRT/VTT تُولَّد تلقائيًا مع كل دبلجة، قابلة للتنزيل والتعديل اليدوي.</p></div>
+      <div class="feat"><div class="fi">🎚️</div><h3>مسارات متعددة</h3><p>تحميل الفيديو بالصوت الأصلي والمدبلج معًا كمسارين منفصلين، مناسب للمونتاج الاحترافي.</p></div>
+      <div class="feat"><div class="fi">⚡</div><h3>معالجة دفعية</h3><p>رفع عدة حلقات أو مقاطع دفعة واحدة ودبلجتها بنفس اللغة والصوت تلقائيًا.</p></div>
+      <div class="feat"><div class="fi">🛡️</div><h3>فلترة إعلانات آمنة للعلامة</h3><p>لا تُعرض إعلانات حساسة أو غير لائقة على محتوى الأطفال أو الفيديوهات التعليمية.</p></div>
+      <div class="feat"><div class="fi">💰</div><h3>مشاركة الأرباح مع الصنّاع</h3><p>صنّاع المحتوى الذين يضمّنون شعار DubWave في فيديوهاتهم يحصلون على نسبة من عائد الإعلانات.</p></div>
+      <div class="feat"><div class="fi">♿</div><h3>وصول أوسع</h3><p>يفتح المحتوى لجماهير جديدة حول العالم، ويدعم أيضًا وصفًا صوتيًا لضعاف البصر.</p></div>
+      <div class="feat"><div class="fi">🔌</div><h3>واجهة برمجية (API)</h3><p>ربط DubWave مباشرة بمنصات الفيديو أو تطبيقات صنّاع المحتوى للدبلجة الآلية عند النشر.</p></div>
+    </div>
+  </div>
+</section>
+
+<section id="languages">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="eyebrow"><span class="dot"></span> التغطية اللغوية</div>
+      <h2>أكثر من 100 لغة، بلهجات إقليمية للأكثر انتشارًا</h2>
+      <p>العربية والإنجليزية والإسبانية تتوفر بعدة لهجات (خليجية، مصرية، شامية / أمريكية، بريطانية / أمريكية لاتينية، قشتالية)، إلى جانب تغطية كاملة للغات آسيا وأفريقيا وأوروبا.</p>
+    </div>
+    <div class="lang-cloud" id="langCloud"></div>
+  </div>
+</section>
+
+<section id="model">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="eyebrow"><span class="dot"></span> نموذج العمل</div>
+      <h2>مجاني للمستخدم، ومموَّل بالكامل من الإعلانات</h2>
+      <p>لا اشتراكات، لا رسوم لكل دقيقة — فقط إعلان أو ثلاثة حسب مدة الفيديو، مع خيار اشتراك اختياري لإزالة الإعلانات لصنّاع المحتوى المحترفين.</p>
+    </div>
+    <div class="model">
+      <div class="stat"><div class="n">١ إعلان</div><div class="l">فيديو أقل من 50 دقيقة</div></div>
+      <div class="stat"><div class="n">٣ إعلانات</div><div class="l">فيديو 50 دقيقة فأكثر</div></div>
+      <div class="stat"><div class="n">+100 لغة</div><div class="l">تغطية عالمية كاملة</div></div>
+      <div class="stat"><div class="n">0$</div><div class="l">تكلفة الاستخدام الأساسي</div></div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap foot-row">
+    <div><span class="logo"><span class="mark" style="width:26px;height:26px;font-size:12px;">DW</span> DubWave</span></div>
+    <div>نموذج أولي (Prototype) — منطق الإعلانات والمدة يعمل فعليًا داخل المتصفح، والدبلجة محاكاة توضيحية.</div>
+  </div>
+</footer>
+
+<div class="overlay" id="adOverlay">
+  <div class="ad-card">
+    <span class="ad-tag">إعلان</span>
+    <div class="ad-visual" id="adVisual">إعلان تجريبي</div>
+    <h4 id="adTitle">راعينا يظهر هنا</h4>
+    <p>هذه مساحة إعلانية توضيحية — في نسخة الإنتاج تُستبدل بإعلان فيديو حقيقي من شبكة إعلانات.</p>
+    <div class="ad-count" id="adCount">إعلان 1 من 1</div>
+    <button class="ad-skip" id="adSkipBtn">تخطي بعد <span id="adTimer">5</span></button>
+  </div>
+</div>
+
+<script>
+// ---------- Language data ----------
+const LANGUAGES = [
+"العربية (فصحى)","العربية (خليجية)","العربية (مصرية)","الإنجليزية (أمريكية)","الإنجليزية (بريطانية)",
+"الإسبانية (إسبانيا)","الإسبانية (أمريكا اللاتينية)","الفرنسية","الألمانية","الإيطالية","البرتغالية (البرازيل)",
+"البرتغالية (البرتغال)","الروسية","الصينية (الماندرين)","اليابانية","الكورية","الهندية","التركية","الفارسية",
+"الأردية","الإندونيسية","الملايو","التايلاندية","الفيتنامية","الهولندية","السويدية","النرويجية","الدنماركية",
+"الفنلندية","البولندية","التشيكية","اليونانية","العبرية","الرومانية","المجرية","الأوكرانية","البلغارية",
+"السواحيلية","البنغالية","التاميلية","التيلوغوية","البنجابية","الفلبينية","الأمهرية","الهاوسا","الزولو",
+"الصومالية","الكردية","البشتو","الأذربيجانية","الكازاخية","الأوزبكية","الجورجية","الأرمنية","المنغولية",
+"النيبالية","السنهالية","الخميرية","اللاوية","البورمية","الكرواتية","الصربية","السلوفاكية","السلوفينية",
+"الليتوانية","اللاتفية","الإستونية","الآيسلندية","الأيرلندية","الويلزية","الكتالانية","الأفريكانية",
+"الألبانية","المالطية"
+];
+
+const langSelect = document.getElementById('langSelect');
+LANGUAGES.forEach(l=>{
+  const o = document.createElement('option'); o.textContent = l; langSelect.appendChild(o);
+});
+langSelect.selectedIndex = 3;
+
+// language cloud
+const cloud = document.getElementById('langCloud');
+LANGUAGES.forEach(l=>{
+  const p = document.createElement('span'); p.className='lang-pill'; p.innerHTML = `<b>${l}</b>`;
+  cloud.appendChild(p);
+});
+const more = document.createElement('span'); more.className='lang-pill more-pill'; more.textContent = '+ أكثر من 30 لغة إضافية';
+cloud.appendChild(more);
+
+// hero ticker
+const tickerWords = LANGUAGES.slice(0,20);
+const tickerHTML = tickerWords.map(w=>`<span>${w}</span>`).join('');
+document.getElementById('tickerTrack').innerHTML = tickerHTML + tickerHTML;
+
+// wave bars
+const waveEl = document.getElementById('waveBars');
+for(let i=0;i<40;i++){
+  const s = document.createElement('span');
+  s.style.animationDelay = (Math.random()*1.2)+'s';
+  waveEl.appendChild(s);
+}
+
+// voice chips
+document.querySelectorAll('.chip').forEach(c=>{
+  c.addEventListener('click', ()=>{
+    document.querySelectorAll('.chip').forEach(x=>x.classList.remove('active'));
+    c.classList.add('active');
+  });
+});
+
+// ---------- Upload & duration detection ----------
+const fileInput = document.getElementById('fileInput');
+const dropZone = document.getElementById('dropZone');
+const fileInfo = document.getElementById('fileInfo');
+const fileName = document.getElementById('fileName');
+const durationBadge = document.getElementById('durationBadge');
+const startBtn = document.getElementById('startBtn');
+let durationMinutes = 0;
+
+dropZone.addEventListener('dragover', e=>{e.preventDefault(); dropZone.style.borderColor='var(--amber)';});
+dropZone.addEventListener('dragleave', ()=>{dropZone.style.borderColor='';});
+dropZone.addEventListener('drop', e=>{
+  e.preventDefault();
+  if(e.dataTransfer.files.length){ handleFile(e.dataTransfer.files[0]); }
+});
+fileInput.addEventListener('change', e=>{
+  if(e.target.files.length){ handleFile(e.target.files[0]); }
+});
+
+function handleFile(file){
+  if(!file.type.startsWith('video/')){
+    alert('الرجاء اختيار ملف فيديو.'); return;
+  }
+  const url = URL.createObjectURL(file);
+  const v = document.createElement('video');
+  v.preload = 'metadata';
+  v.onloadedmetadata = () => {
+    durationMinutes = v.duration / 60;
+    URL.revokeObjectURL(url);
+    fileName.textContent = file.name.length > 28 ? file.name.slice(0,25)+'…' : file.name;
+    const mins = Math.max(1, Math.round(durationMinutes));
+    if(durationMinutes >= 50){
+      durationBadge.textContent = `${mins} دقيقة — سيُعرض 3 إعلانات`;
+      durationBadge.classList.add('long');
+    }else{
+      durationBadge.textContent = `${mins} دقيقة — سيُعرض إعلان واحد`;
+      durationBadge.classList.remove('long');
+    }
+    fileInfo.style.display = 'flex';
+    startBtn.disabled = false;
+  };
+  v.onerror = () => {
+    alert('تعذّرت قراءة مدة هذا الملف، جرّب ملفًا آخر.');
+  };
+  v.src = url;
+}
+
+// ---------- Dub simulation with ad logic ----------
+const progressWrap = document.getElementById('progressWrap');
+const progressFill = document.getElementById('progressFill');
+const progressLabel = document.getElementById('progressLabel');
+const resultBox = document.getElementById('resultBox');
+const overlay = document.getElementById('adOverlay');
+const adVisual = document.getElementById('adVisual');
+const adTitle = document.getElementById('adTitle');
+const adCount = document.getElementById('adCount');
+const adSkipBtn = document.getElementById('adSkipBtn');
+const adTimer = document.getElementById('adTimer');
+
+const AD_BRANDS = ['متجر نوفا للإلكترونيات','تطبيق رحلة — حجز سفر','مقهى الحبة الذهبية','منصة تعلّم لغات جديدة','بنك المستقبل الرقمي'];
+
+startBtn.addEventListener('click', async ()=>{
+  startBtn.disabled = true;
+  const adsNeeded = durationMinutes >= 50 ? 3 : 1;
+  await runAds(adsNeeded);
+  runDubbingProgress();
+});
+
+function runAds(count){
+  return new Promise(resolve=>{
+    let current = 0;
+    function showNext(){
+      current++;
+      if(current > count){ overlay.classList.remove('show'); resolve(); return; }
+      overlay.classList.add('show');
+      adCount.textContent = `إعلان ${current} من ${count}`;
+      adTitle.textContent = AD_BRANDS[(current-1) % AD_BRANDS.length];
+      adVisual.textContent = 'إعلان تجريبي #' + current;
+      let t = 5;
+      adTimer.textContent = t;
+      adSkipBtn.classList.remove('ready');
+      adSkipBtn.onclick = null;
+      const iv = setInterval(()=>{
+        t--;
+        adTimer.textContent = t;
+        if(t<=0){
+          clearInterval(iv);
+          adSkipBtn.classList.add('ready');
+          adSkipBtn.innerHTML = current < count ? 'التالي' : 'متابعة إلى الدبلجة';
+          adSkipBtn.onclick = ()=>{ showNext(); };
+        }
+      },1000);
+    }
+    showNext();
+  });
+}
+
+function runDubbingProgress(){
+  progressWrap.classList.add('show');
+  resultBox.classList.remove('show');
+  const stages = ['جاري تحليل الصوت الأصلي…','جاري الترجمة إلى اللغة المختارة…','جاري توليد الصوت المدبلج…','جاري مزامنة التوقيت مع الفيديو…'];
+  let pct = 0;
+  let stageIdx = 0;
+  progressLabel.textContent = stages[0];
+  const iv = setInterval(()=>{
+    pct += Math.random()*9 + 4;
+    if(pct > 100) pct = 100;
+    progressFill.style.width = pct + '%';
+    const newStage = Math.min(stages.length-1, Math.floor((pct/100)*stages.length));
+    if(newStage !== stageIdx){ stageIdx = newStage; progressLabel.textContent = stages[stageIdx]; }
+    if(pct >= 100){
+      clearInterval(iv);
+      progressLabel.textContent = 'اكتملت الدبلجة';
+      const lang = langSelect.value;
+      resultBox.innerHTML = `تم إعداد نسخة تجريبية مدبلجة إلى <b>${lang}</b>. في نسخة الإنتاج الفعلية، سيظهر هنا رابط تحميل الفيديو المدبلج وملف الترجمة النصية (SRT).`;
+      resultBox.classList.add('show');
+      startBtn.disabled = false;
+      startBtn.textContent = 'دبلجة فيديو آخر';
+    }
+  }, 260);
+}
+</script>
+</body>
+</html>
