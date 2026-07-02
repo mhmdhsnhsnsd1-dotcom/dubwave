@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>محرك الدبلجة الحقيقي — DubWave</title>
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;900&family=Cairo:wght@700;800&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#0c1118; --panel:#161f2c; --line:rgba(237,234,227,0.09);
+    --paper:#EDEAE3; --paper-dim:#9aa3af; --amber:#F2A93B; --teal:#2BA793; --danger:#e3654a;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--ink);color:var(--paper);font-family:'Tajawal',sans-serif;padding:20px;line-height:1.7;}
+  .wrap{max-width:640px;margin:0 auto;}
+  h1{font-family:'Cairo';font-size:22px;margin:0 0 6px;}
+  p.sub{color:var(--paper-dim);font-size:14px;margin:0 0 24px;}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:22px;margin-bottom:16px;}
+  .note{font-size:12.5px;color:var(--paper-dim);background:rgba(242,169,59,0.07);border:1px solid rgba(242,169,59,0.25);padding:10px 12px;border-radius:8px;margin-bottom:20px;}
+  label{display:block;font-size:13px;color:var(--paper-dim);margin:0 0 6px;}
+  select,input[type=file]{width:100%;background:#0f1621;border:1px solid var(--line);color:var(--paper);padding:10px 12px;border-radius:8px;font-family:'Tajawal';font-size:14px;margin-bottom:16px;}
+  .btn{width:100%;padding:13px;border:none;border-radius:10px;background:var(--amber);color:#181205;font-weight:800;font-size:15px;cursor:pointer;font-family:'Tajawal';margin-bottom:8px;}
+  .btn:disabled{opacity:.45;cursor:not-allowed;}
+  .btn-secondary{background:var(--teal);color:#08201c;}
+  video{width:100%;border-radius:10px;margin-bottom:14px;background:#000;}
+  .status{font-family:'IBM Plex Mono';font-size:12.5px;color:var(--teal);margin-bottom:10px;min-height:18px;}
+  .bar{height:6px;background:#0f1621;border-radius:99px;overflow:hidden;margin-bottom:14px;}
+  .bar-fill{height:100%;width:0%;background:linear-gradient(90deg,var(--teal),var(--amber));transition:width .2s;}
+  .transcript{max-height:200px;overflow-y:auto;font-size:13px;color:var(--paper-dim);background:#0f1621;border-radius:8px;padding:12px;margin-bottom:14px;}
+  .transcript .line{margin-bottom:8px;padding-bottom:8px;border-bottom:1px solid var(--line);}
+  .transcript .t{color:var(--teal);font-family:'IBM Plex Mono';font-size:11px;}
+  .overlay{position:fixed;inset:0;background:rgba(6,8,12,0.9);display:none;align-items:center;justify-content:center;z-index:100;padding:20px;}
+  .overlay.show{display:flex;}
+  .ad-card{width:100%;max-width:380px;background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:24px;text-align:center;}
+  .ad-visual{height:130px;border-radius:10px;margin-bottom:14px;background:repeating-linear-gradient(135deg,#1c6157,#1c6157 10px,#0f1621 10px,#0f1621 20px);display:flex;align-items:center;justify-content:center;font-family:'Cairo';font-weight:800;color:var(--paper);}
+  .ad-skip{width:100%;padding:11px;border-radius:8px;border:none;background:#0f1621;color:var(--paper-dim);font-family:'IBM Plex Mono';cursor:not-allowed;}
+  .ad-skip.ready{background:var(--amber);color:#181205;cursor:pointer;font-weight:700;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>🎙️ محرك الدبلجة الحقيقي (مجاني بالكامل)</h1>
+  <p class="sub">يشتغل داخل متصفحك مباشرة — بدون اشتراك، بدون API مدفوع. أول تشغيل يحتاج تنزيل نموذج صغير (~40 ميجا) لمرة وحدة.</p>
+
+  <div class="note">
+    ⚠️ هذه نسخة حقيقية تجريبية: تحوّل الفيديو لنص، تترجمه، وتشغّل صوت الدبلجة أثناء المشاهدة. الجودة تعتمد على وضوح الصوت الأصلي وسرعة جهازك. الشبكة اللاسلكية (WiFi) أفضل من بيانات الجوال لتنزيل النموذج أول مرة.
+  </div>
+
+  <div class="card">
+    <label>1) اختر ملف فيديو</label>
+    <input type="file" id="fileInput" accept="video/*">
+
+    <label>2) لغة الفيديو الأصلية</label>
+    <select id="sourceLang">
+      <option value="ar">العربية</option>
+      <option value="en">الإنجليزية</option>
+      <option value="fr">الفرنسية</option>
+      <option value="es">الإسبانية</option>
+      <option value="tr">التركية</option>
+      <option value="hi">الهندية</option>
+      <option value="sw">السواحيلية</option>
+    </select>
+
+    <label>3) لغة الدبلجة الهدف</label>
+    <select id="targetLang">
+      <option value="en">الإنجليزية</option>
+      <option value="ar">العربية</option>
+      <option value="fr">الفرنسية</option>
+      <option value="es">الإسبانية</option>
+      <option value="sw">السواحيلية</option>
+      <option value="hi">الهندية</option>
+    </select>
+
+    <button class="btn" id="startBtn" disabled>ابدأ المعالجة</button>
+    <div class="status" id="statusText"></div>
+    <div class="bar"><div class="bar-fill" id="barFill"></div></div>
+  </div>
+
+  <div class="card" id="playerCard" style="display:none;">
+    <video id="videoPlayer" controls></video>
+    <button class="btn btn-secondary" id="playDubbedBtn">▶️ شغّل بالصوت المدبلج</button>
+    <button class="btn" id="downloadSrtBtn" style="background:var(--panel);color:var(--paper);border:1px solid var(--line);">⬇️ تحميل ملف الترجمة النصية (SRT)</button>
+  </div>
+
+  <div class="card" id="transcriptCard" style="display:none;">
+    <label>النص المفرّغ والمترجم</label>
+    <div class="transcript" id="transcriptBox"></div>
+  </div>
+</div>
+
+<div class="overlay" id="adOverlay">
+  <div class="ad-card">
+    <span style="font-family:'IBM Plex Mono';font-size:11px;background:var(--amber);color:#181205;padding:3px 10px;border-radius:6px;">إعلان</span>
+    <div class="ad-visual" id="adVisual" style="margin-top:14px;">إعلان تجريبي</div>
+    <p style="font-size:12px;color:var(--paper-dim);margin:10px 0 16px;">مساحة إعلانية — تُستبدل بإعلان حقيقي من AdSense لاحقًا</p>
+    <button class="ad-skip" id="adSkipBtn">تخطي بعد <span id="adTimer">5</span></button>
+  </div>
+</div>
+
+<script type="module">
+import { pipeline, env } from "https://cdn.jsdelivr.net/npm/@xenova/transformers@2.17.2";
+env.allowLocalModels = false;
+
+const fileInput = document.getElementById('fileInput');
+const startBtn = document.getElementById('startBtn');
+const statusText = document.getElementById('statusText');
+const barFill = document.getElementById('barFill');
+const playerCard = document.getElementById('playerCard');
+const videoPlayer = document.getElementById('videoPlayer');
+const transcriptCard = document.getElementById('transcriptCard');
+const transcriptBox = document.getElementById('transcriptBox');
+const playDubbedBtn = document.getElementById('playDubbedBtn');
+const downloadSrtBtn = document.getElementById('downloadSrtBtn');
+const overlay = document.getElementById('adOverlay');
+const adSkipBtn = document.getElementById('adSkipBtn');
+const adTimer = document.getElementById('adTimer');
+const adVisual = document.getElementById('adVisual');
+
+let selectedFile = null;
+let durationMinutes = 0;
+let chunks = []; // {timestamp:[start,end], text, translated}
+
+function setStatus(t){ statusText.textContent = t; }
+function setProgress(p){ barFill.style.width = Math.min(100,p) + '%'; }
+
+fileInput.addEventListener('change', e=>{
+  const file = e.target.files[0];
+  if(!file) return;
+  selectedFile = file;
+  const url = URL.createObjectURL(file);
+  const v = document.createElement('video');
+  v.preload = 'metadata';
+  v.onloadedmetadata = () => {
+    durationMinutes = v.duration / 60;
+    URL.revokeObjectURL(url);
+    startBtn.disabled = false;
+    setStatus(`مدة الفيديو: ${Math.round(durationMinutes)} دقيقة — سيُعرض ${durationMinutes>=50?'3 إعلانات':'إعلان واحد'} قبل البدء`);
+  };
+  v.src = url;
+});
+
+function runAds(count){
+  const BRANDS = ['متجر نوفا للإلكترونيات','تطبيق رحلة — حجز سفر','مقهى الحبة الذهبية'];
+  return new Promise(resolve=>{
+    let current = 0;
+    function next(){
+      current++;
+      if(current > count){ overlay.classList.remove('show'); resolve(); return; }
+      overlay.classList.add('show');
+      adVisual.textContent = 'إعلان تجريبي #' + current + ' — ' + BRANDS[(current-1)%BRANDS.length];
+      let t = 5; adTimer.textContent = t;
+      adSkipBtn.classList.remove('ready'); adSkipBtn.textContent = 'تخطي بعد ' + t;
+      const iv = setInterval(()=>{
+        t--;
+        if(t<=0){
+          clearInterval(iv);
+          adSkipBtn.classList.add('ready');
+          adSkipBtn.textContent = current<count ? 'التالي' : 'متابعة للمعالجة';
+          adSkipBtn.onclick = next;
+        } else {
+          adSkipBtn.textContent = 'تخطي بعد ' + t;
+        }
+      },1000);
+    }
+    next();
+  });
+}
+
+// تحويل ملف الفيديو إلى صوت أحادي 16kHz — الصيغة المطلوبة لنموذج Whisper
+async function decodeAudioTo16k(file){
+  const arrayBuffer = await file.arrayBuffer();
+  const tempCtx = new (window.AudioContext || window.webkitAudioContext)();
+  const decoded = await tempCtx.decodeAudioData(arrayBuffer);
+  const offline = new OfflineAudioContext(1, Math.ceil(decoded.duration * 16000), 16000);
+  const src = offline.createBufferSource();
+  src.buffer = decoded;
+  src.connect(offline.destination);
+  src.start();
+  const rendered = await offline.startRendering();
+  return rendered.getChannelData(0);
+}
+
+// ترجمة نص عبر خدمة MyMemory المجانية (بدون مفتاح API)
+async function translateText(text, source, target){
+  if(!text.trim()) return '';
+  const url = `https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=${source}|${target}`;
+  try{
+    const res = await fetch(url);
+    const data = await res.json();
+    return data.responseData?.translatedText || text;
+  }catch(e){
+    console.error('translate error', e);
+    return text;
+  }
+}
+
+const VOICE_LANG_MAP = { ar:'ar-SA', en:'en-US', fr:'fr-FR', es:'es-ES', sw:'sw-KE', hi:'hi-IN', tr:'tr-TR' };
+
+function speakText(text, langCode){
+  return new Promise(resolve=>{
+    if(!text.trim()){ resolve(); return; }
+    const utter = new SpeechSynthesisUtterance(text);
+    utter.lang = VOICE_LANG_MAP[langCode] || 'en-US';
+    utter.onend = resolve;
+    utter.onerror = resolve;
+    speechSynthesis.speak(utter);
+  });
+}
+
+function secondsToSrtTime(s){
+  const h = String(Math.floor(s/3600)).padStart(2,'0');
+  const m = String(Math.floor((s%3600)/60)).padStart(2,'0');
+  const sec = String(Math.floor(s%60)).padStart(2,'0');
+  const ms = String(Math.floor((s%1)*1000)).padStart(3,'0');
+  return `${h}:${m}:${sec},${ms}`;
+}
+
+function buildSrt(chunks){
+  return chunks.map((c,i)=>{
+    const [start,end] = c.timestamp;
+    return `${i+1}\n${secondsToSrtTime(start)} --> ${secondsToSrtTime(end||start+3)}\n${c.translated}\n`;
+  }).join('\n');
+}
+
+startBtn.addEventListener('click', async ()=>{
+  if(!selectedFile) return;
+  startBtn.disabled = true;
+
+  const adsNeeded = durationMinutes >= 50 ? 3 : 1;
+  await runAds(adsNeeded);
+
+  const sourceLang = document.getElementById('sourceLang').value;
+  const targetLang = document.getElementById('targetLang').value;
+
+  try{
+    setStatus('جاري تحميل نموذج التفريغ الصوتي (مرة واحدة فقط)…');
+    setProgress(5);
+    const transcriber = await pipeline('automatic-speech-recognition', 'Xenova/whisper-tiny', {
+      progress_callback: (p)=>{
+        if(p.status === 'progress'){
+          setProgress(5 + (p.progress||0)*0.35);
+          setStatus(`جاري تحميل النموذج… ${Math.round(p.progress||0)}%`);
+        }
+      }
+    });
+
+    setStatus('جاري تحليل الصوت من الفيديو…');
+    setProgress(42);
+    const audioData = await decodeAudioTo16k(selectedFile);
+
+    setStatus('جاري تفريغ الكلام إلى نص (قد يأخذ دقائق حسب طول الفيديو وسرعة جهازك)…');
+    const output = await transcriber(audioData, {
+      language: sourceLang,
+      task: 'transcribe',
+      return_timestamps: true,
+      chunk_length_s: 30,
+      stride_length_s: 5,
+    });
+    setProgress(70);
+
+    chunks = (output.chunks && output.chunks.length ? output.chunks : [{timestamp:[0,durationMinutes*60], text:output.text}]);
+
+    setStatus('جاري ترجمة النص…');
+    for(let i=0;i<chunks.length;i++){
+      chunks[i].translated = await translateText(chunks[i].text, sourceLang, targetLang);
+      setProgress(70 + (i/chunks.length)*25);
+    }
+
+    setProgress(100);
+    setStatus('اكتملت المعالجة ✅');
+
+    // اعرض النص
+    transcriptBox.innerHTML = chunks.map(c=>{
+      const [s] = c.timestamp;
+      return `<div class="line"><span class="t">${Math.floor(s/60)}:${String(Math.floor(s%60)).padStart(2,'0')}</span><br>${c.translated}</div>`;
+    }).join('');
+    transcriptCard.style.display = 'block';
+
+    // جهّز الفيديو للمشاهدة
+    videoPlayer.src = URL.createObjectURL(selectedFile);
+    playerCard.style.display = 'block';
+    startBtn.textContent = 'دبلجة فيديو آخر';
+    startBtn.disabled = false;
+
+  }catch(err){
+    console.error(err);
+    setStatus('حدث خطأ: ' + err.message + ' — جرّب فيديو أقصر أو تأكد من اتصال الإنترنت لتحميل النموذج أول مرة.');
+    startBtn.disabled = false;
+  }
+});
+
+// تشغيل الفيديو مع كتم الصوت الأصلي وتشغيل الصوت المدبلج بالتزامن مع التوقيت
+let dubbingActive = false;
+playDubbedBtn.addEventListener('click', async ()=>{
+  if(!chunks.length) return;
+  dubbingActive = true;
+  videoPlayer.muted = true;
+  videoPlayer.currentTime = 0;
+  videoPlayer.play();
+  speechSynthesis.cancel();
+
+  for(const c of chunks){
+    if(!dubbingActive) break;
+    const [start] = c.timestamp;
+    // انتظر حتى يصل الفيديو لتوقيت هذا المقطع
+    while(videoPlayer.currentTime < start && dubbingActive){
+      await new Promise(r=>setTimeout(r, 150));
+    }
+    await speakText(c.translated, document.getElementById('targetLang').value);
+  }
+});
+
+videoPlayer.addEventListener('pause', ()=>{ dubbingActive = false; speechSynthesis.cancel(); });
+
+downloadSrtBtn.addEventListener('click', ()=>{
+  const srt = buildSrt(chunks);
+  const blob = new Blob([srt], {type:'text/plain'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'dubwave-subtitles.srt';
+  a.click();
+});
+</script>
+</body>
+</html>
